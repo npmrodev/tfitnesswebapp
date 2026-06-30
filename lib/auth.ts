@@ -19,6 +19,7 @@ const trustedOrigins = [
   ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
     : []),
+  'https://tfitnesswebapp.vercel.app',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
 ]
@@ -37,14 +38,10 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
   },
-  ...(process.env.NODE_ENV === 'development'
-    ? {
-        advanced: {
-          defaultCookieAttributes: {
-            sameSite: isLocalhost ? 'lax' as const : 'none' as const,
-            secure: !isLocalhost,
-          },
-        },
-      }
-    : {}),
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: isLocalhost ? 'lax' as const : 'lax' as const,
+      secure: !isLocalhost,
+    },
+  },
 })
