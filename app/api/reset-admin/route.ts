@@ -1,14 +1,28 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { user, userRole, member } from '@/lib/db/schema'
+import { user, userRole, member, account } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function POST() {
   try {
     const email = 'admin@tfitness.com'
     const password = 'Admin@123'
     
-    // Try to sign up the admin account
+    // Check if user exists
+    const existingUser = await db.query.user.findFirst({
+      where: eq(user.email, email),
+    })
+    
+    if (existingUser) {
+      // Delete existing user and related data
+      await db.delete(userRole).where(eq(userRole.userId, existingUser.id))
+      await db.delete(member).where(eq(member.userId, existingUser.id))
+      await db.delete(account).where(eq(account.userId, existingUser.id))
+      await db.delete(user).where(eq(user.id, existingUser.id))
+    }
+    
+    // Create new admin account
     const result = await auth.api.signUpEmail({
       body: {
         email,
@@ -17,13 +31,12 @@ export async function POST() {
       },
     })
     
-    if ((result as any).response?.status === 409) {
-      // Account already exists, try to update the password
+    if ((result as any).error) {
       return NextResponse.json({ 
         success: false, 
-        message: 'Admin account already exists. Please use sign-up page to create a new account.',
-        instructions: 'Go to https://tfitnesswebapp.vercel.app/sign-up to create a new account'
-      })
+        message: 'Failed to create admin account',
+        error: (result as any).error?.message || 'Unknown error'
+      }, { status: 500 })
     }
     
     // Set the role to owner
@@ -46,15 +59,15 @@ export async function POST() {
       success: true, 
       message: 'Admin account created successfully',
       email: email,
-      password: password
+      password: password,
+      instructions: 'You can now log in at https://tfitnesswebapp.vercel.app/sign-in'
     })
   } catch (error) {
     console.error('[Reset Admin] Error:', error)
     return NextResponse.json({ 
       success: false, 
       message: 'Account creation failed',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      instructions: 'Please go to https://tfitnesswebapp.vercel.app/sign-up to create a new account'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
