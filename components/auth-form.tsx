@@ -21,19 +21,24 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setError(null)
     setLoading(true)
 
-    const { error } = isSignUp
-      ? await authClient.signUp.email({ email, password, name })
-      : await authClient.signIn.email({ email, password })
+    try {
+      const { error } = isSignUp
+        ? await authClient.signUp.email({ email, password, name })
+        : await authClient.signIn.email({ email, password })
 
-    setLoading(false)
+      setLoading(false)
 
-    if (error) {
-      setError(error.message ?? 'Something went wrong')
-      return
+      if (error) {
+        setError(error.message ?? 'Something went wrong')
+        return
+      }
+
+      // Force a hard redirect to ensure session is properly set
+      window.location.href = '/dashboard'
+    } catch (err) {
+      setLoading(false)
+      setError('Something went wrong. Please try again.')
     }
-
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
@@ -141,23 +146,11 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             </button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
+          {!isSignUp && (
+            <div className="text-center text-sm text-muted-foreground">
+              Contact admin to create a new account
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">
-                {isSignUp ? 'Already have an account?' : 'New to T-FITNESS?'}
-              </span>
-            </div>
-          </div>
-
-          <Link
-            href={isSignUp ? '/sign-in' : '/sign-up'}
-            className="btn-outline w-full text-center"
-          >
-            {isSignUp ? 'Sign In' : 'Create Account'}
-          </Link>
+          )}
         </div>
 
       </div>
