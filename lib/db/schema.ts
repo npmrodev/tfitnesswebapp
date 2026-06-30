@@ -15,6 +15,9 @@ export const user = pgTable('user', {
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
   userId: text('userId').notNull().references(() => user.id),
+  token: text('token').notNull(),
+  ipAddress: text('ipAddress'),
+  userAgent: text('userAgent'),
   expiresAt: timestamp('expiresAt').notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
