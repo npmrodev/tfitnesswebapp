@@ -62,25 +62,6 @@ pnpm dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Test Credentials
-
-The system comes with pre-configured test accounts. Log in with:
-
-### Owner Account
-- **Email**: admin@tfitness.com
-- **Password**: Password123
-- **Access**: Full system access including settings, reports, and audit logs
-
-### Staff Account
-- **Email**: staff@tfitness.com
-- **Password**: Password123
-- **Access**: Member management, check-ins, and payment processing
-
-### Member Account
-- **Email**: member@tfitness.com
-- **Password**: Password123
-- **Access**: Personal dashboard, check-ins, and membership information
-
 ## Application Structure
 
 ```

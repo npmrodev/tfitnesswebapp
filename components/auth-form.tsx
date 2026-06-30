@@ -160,15 +160,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           </Link>
         </div>
 
-        {/* Test Credentials */}
-        <div className="bg-secondary/50 border border-border p-4 space-y-2">
-          <p className="text-xs font-semibold text-foreground">Test Credentials</p>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <p>Owner: admin@tfitness.com / Password123</p>
-            <p>Staff: staff@tfitness.com / Password123</p>
-            <p>Member: member@tfitness.com / Password123</p>
-          </div>
-        </div>
       </div>
     </main>
   )
