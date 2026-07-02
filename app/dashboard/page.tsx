@@ -1,14 +1,14 @@
-import { headers } from 'next/headers'
-import { auth } from '@/lib/auth'
+import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
-import { userRole } from '@/lib/db/schema'
+import { user, userRole } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { Sidebar } from '@/components/sidebar'
 
 export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get('session')
   
-  if (!session?.user) {
+  if (!sessionCookie?.value) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Please sign in to access the dashboard</p>
@@ -16,11 +16,24 @@ export default async function DashboardPage() {
     )
   }
 
-  // Get user role with error handling
+  // Get user from database using session cookie
+  const userRecord = await db.query.user.findFirst({
+    where: eq(user.id, sessionCookie.value),
+  })
+
+  if (!userRecord) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">User not found. Please sign in again.</p>
+      </div>
+    )
+  }
+
+  // Get user role
   let role = 'member'
   try {
     const userRoleData = await db.query.userRole.findFirst({
-      where: eq(userRole.userId, session.user.id),
+      where: eq(userRole.userId, userRecord.id),
     })
     role = userRoleData?.role || 'member'
   } catch (error) {
@@ -38,7 +51,7 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back, {session.user.name || session.user.email}
+              Welcome back, {userRecord.name || userRecord.email}
             </p>
             <p className="text-sm text-muted-foreground">
               Role: {role}
