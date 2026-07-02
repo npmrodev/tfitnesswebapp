@@ -32,6 +32,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       })
 
       console.log('Response status:', response.status)
@@ -53,15 +54,8 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
       setSuccess('Login successful! Redirecting...')
       setShowDashboardLink(true)
       
-      // Try multiple redirect methods
-      setTimeout(() => {
-        try {
-          window.location.href = '/dashboard'
-        } catch (e) {
-          console.error('Redirect failed:', e)
-          router.push('/dashboard')
-        }
-      }, 500)
+      // Force page reload to ensure cookies are set
+      window.location.reload()
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
