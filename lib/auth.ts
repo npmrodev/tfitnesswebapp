@@ -10,7 +10,7 @@ const baseURL =
       ? `https://${process.env.VERCEL_URL}`
       : process.env.V0_RUNTIME_URL
         ? process.env.V0_RUNTIME_URL
-        : 'http://localhost:3000')
+        : 'https://tfitnesswebapp.vercel.app')
 
 const trustedOrigins = [
   ...(process.env.NEXT_PUBLIC_APP_URL ? [process.env.NEXT_PUBLIC_APP_URL] : []),
