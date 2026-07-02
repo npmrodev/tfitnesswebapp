@@ -19,21 +19,34 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setError(null)
     setLoading(true)
 
+    console.log('Attempting to sign in...', { email, isSignUp })
+
     try {
-      const { error } = isSignUp
-        ? await authClient.signUp.email({ email, password, name })
-        : await authClient.signIn.email({ email, password })
+      // Use server-side API for login
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const result = await response.json()
+      console.log('Login API result:', result)
 
       setLoading(false)
 
-      if (error) {
-        setError(error.message ?? 'Something went wrong')
+      if (!response.ok || result.error) {
+        setError(result.error || 'Something went wrong')
         return
       }
 
-      // Force a hard redirect to ensure session is properly set
+      console.log('Sign in successful, redirecting to dashboard')
+      
+      // Use window.location for hard redirect to ensure cookies are set
       window.location.href = '/dashboard'
     } catch (err) {
+      console.error('Sign in error:', err)
       setLoading(false)
       setError('Something went wrong. Please try again.')
     }
