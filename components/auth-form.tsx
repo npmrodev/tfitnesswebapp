@@ -10,6 +10,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const isSignUp = mode === 'sign-up'
@@ -17,6 +18,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccess(null)
     setLoading(true)
 
     console.log('Attempting to sign in...', { email, isSignUp })
@@ -46,13 +48,13 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
 
       console.log('Sign in successful, redirecting to dashboard')
       
-      // Show success briefly before redirect
-      setError(null)
+      // Show success message
+      setSuccess('Login successful! Redirecting...')
       
       // Use window.location for hard redirect to ensure cookies are set
       setTimeout(() => {
         window.location.href = '/dashboard'
-      }, 500)
+      }, 1000)
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
@@ -149,6 +151,12 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             {error && (
               <div className="bg-destructive/10 border border-destructive text-destructive text-sm p-3">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-green-500/10 border border-green-500 text-green-500 text-sm p-3">
+                {success}
               </div>
             )}
 
