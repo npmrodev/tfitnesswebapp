@@ -31,6 +31,8 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         body: JSON.stringify({ email, password }),
       })
 
+      console.log('Response status:', response.status)
+
       const result = await response.json()
       console.log('Login API result:', result)
 
@@ -38,17 +40,23 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
 
       if (!response.ok || result.error) {
         setError(result.error || 'Something went wrong')
+        console.error('Login failed:', result.error)
         return
       }
 
       console.log('Sign in successful, redirecting to dashboard')
       
+      // Show success briefly before redirect
+      setError(null)
+      
       // Use window.location for hard redirect to ensure cookies are set
-      window.location.href = '/dashboard'
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 500)
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
-      setError('Something went wrong. Please try again.')
+      setError('Network error. Please check your connection and try again.')
     }
   }
 
