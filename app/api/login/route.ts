@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { user, userRole } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,22 +45,23 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Set simple session cookie
-    const cookieStore = await cookies()
-    cookieStore.set('session', userRecord.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+    // Get user role
+    const userRoleData = await db.query.userRole.findFirst({
+      where: eq(userRole.userId, userRecord.id),
     })
 
-    console.log('Simple login successful:', { userId: userRecord.id, email })
+    const role = userRoleData?.role || 'member'
 
+    console.log('Simple login successful:', { userId: userRecord.id, email, role })
+
+    // Return user data with token (using user ID as simple token)
     return NextResponse.json({ 
       success: true, 
+      token: userRecord.id,
       userId: userRecord.id,
       email: userRecord.email,
       name: userRecord.name,
+      role: role,
     })
   } catch (error) {
     console.error('Simple login error:', error)

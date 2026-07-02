@@ -1,49 +1,51 @@
-import { cookies } from 'next/headers'
-import { db } from '@/lib/db'
-import { user, userRole } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('session')
-  
-  if (!sessionCookie?.value) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Please sign in to access the dashboard</p>
-      </div>
-    )
-  }
+export default function DashboardPage() {
+  const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Get user from database using session cookie
-  const userRecord = await db.query.user.findFirst({
-    where: eq(user.id, sessionCookie.value),
-  })
+  useEffect(() => {
+    // Check if user is logged in via localStorage
+    const token = localStorage.getItem('auth_token')
+    const userId = localStorage.getItem('user_id')
+    const userEmail = localStorage.getItem('user_email')
+    const userName = localStorage.getItem('user_name')
+    const userRole = localStorage.getItem('user_role')
 
-  if (!userRecord) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">User not found. Please sign in again.</p>
-      </div>
-    )
-  }
+    if (!token || !userId) {
+      router.push('/sign-in')
+      return
+    }
 
-  // Get user role
-  let role = 'member'
-  try {
-    const userRoleData = await db.query.userRole.findFirst({
-      where: eq(userRole.userId, userRecord.id),
+    setUser({
+      id: userId,
+      email: userEmail,
+      name: userName,
+      role: userRole,
     })
-    role = userRoleData?.role || 'member'
-  } catch (error) {
-    console.error('Error fetching user role:', error)
-    role = 'member'
+    setLoading(false)
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
   }
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar userRole={role} />
+      <Sidebar userRole={user.role} />
       
       <main className="flex-1 md:ml-64 p-6 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
@@ -51,10 +53,10 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back, {userRecord.name || userRecord.email}
+              Welcome back, {user.name || user.email}
             </p>
             <p className="text-sm text-muted-foreground">
-              Role: {role}
+              Role: {user.role}
             </p>
           </div>
 

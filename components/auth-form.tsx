@@ -32,7 +32,6 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
       })
 
       console.log('Response status:', response.status)
@@ -48,14 +47,23 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
         return
       }
 
-      console.log('Sign in successful, redirecting to dashboard')
+      console.log('Sign in successful, storing token and redirecting')
       
-      // Show success message and manual link
+      // Store user data in localStorage
+      localStorage.setItem('auth_token', result.token)
+      localStorage.setItem('user_id', result.userId)
+      localStorage.setItem('user_email', result.email)
+      localStorage.setItem('user_name', result.name)
+      localStorage.setItem('user_role', result.role)
+      
+      // Show success message
       setSuccess('Login successful! Redirecting...')
       setShowDashboardLink(true)
       
-      // Force page reload to ensure cookies are set
-      window.location.reload()
+      // Redirect to dashboard
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 500)
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
