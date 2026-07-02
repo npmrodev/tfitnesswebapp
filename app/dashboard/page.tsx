@@ -3,14 +3,17 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { userRole } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() })
   
   if (!session?.user) {
-    redirect('/sign-in')
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Please sign in to access the dashboard</p>
+      </div>
+    )
   }
 
   // Get user role with error handling
