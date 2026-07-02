@@ -51,10 +51,8 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
       // Show success message
       setSuccess('Login successful! Redirecting...')
       
-      // Use window.location for hard redirect to ensure cookies are set
-      setTimeout(() => {
-        window.location.href = '/dashboard'
-      }, 1000)
+      // Use window.location.replace for immediate redirect
+      window.location.replace('/dashboard')
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
