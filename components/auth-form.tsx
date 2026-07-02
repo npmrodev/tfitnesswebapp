@@ -11,6 +11,7 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [showDashboardLink, setShowDashboardLink] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const isSignUp = mode === 'sign-up'
@@ -48,11 +49,19 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
 
       console.log('Sign in successful, redirecting to dashboard')
       
-      // Show success message
+      // Show success message and manual link
       setSuccess('Login successful! Redirecting...')
+      setShowDashboardLink(true)
       
-      // Use window.location.replace for immediate redirect
-      window.location.replace('/dashboard')
+      // Try multiple redirect methods
+      setTimeout(() => {
+        try {
+          window.location.href = '/dashboard'
+        } catch (e) {
+          console.error('Redirect failed:', e)
+          router.push('/dashboard')
+        }
+      }, 500)
     } catch (err) {
       console.error('Sign in error:', err)
       setLoading(false)
@@ -155,6 +164,13 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
             {success && (
               <div className="bg-green-500/10 border border-green-500 text-green-500 text-sm p-3">
                 {success}
+                {showDashboardLink && (
+                  <div className="mt-2">
+                    <a href="/dashboard" className="underline hover:text-green-600">
+                      Click here if not redirected automatically
+                    </a>
+                  </div>
+                )}
               </div>
             )}
 
