@@ -22,7 +22,10 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setSuccess(null)
     setLoading(true)
 
-    console.log('Attempting to sign in...', { email, isSignUp })
+    console.log('=== LOGIN DEBUG START ===')
+    console.log('Email:', email)
+    console.log('Password length:', password.length)
+    console.log('Is sign up:', isSignUp)
 
     // Simple hardcoded credentials check on client side
     const validCredentials = {
@@ -30,30 +33,54 @@ export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
       'staff@tfitness.com': 'Staff@123',
     }
 
-    if (validCredentials[email as keyof typeof validCredentials] !== password) {
+    const isValid = validCredentials[email as keyof typeof validCredentials] === password
+    console.log('Credentials valid:', isValid)
+
+    if (!isValid) {
+      console.log('Invalid credentials')
       setLoading(false)
       setError('Invalid credentials')
       return
     }
 
-    console.log('Sign in successful, storing data and redirecting')
+    console.log('Credentials valid, preparing to store data')
     
     // Store user data in localStorage
     const role = email === 'admin@tfitness.com' ? 'owner' : 'staff'
     const name = email === 'admin@tfitness.com' ? 'Admin User' : 'Staff User'
     const userId = email === 'admin@tfitness.com' ? 'admin-id' : 'staff-id'
     
-    localStorage.setItem('auth_token', userId)
-    localStorage.setItem('user_id', userId)
-    localStorage.setItem('user_email', email)
-    localStorage.setItem('user_name', name)
-    localStorage.setItem('user_role', role)
+    console.log('Storing in localStorage:', { userId, email, name, role })
+    
+    try {
+      localStorage.setItem('auth_token', userId)
+      localStorage.setItem('user_id', userId)
+      localStorage.setItem('user_email', email)
+      localStorage.setItem('user_name', name)
+      localStorage.setItem('user_role', role)
+      
+      console.log('localStorage set successfully')
+      console.log('Checking localStorage values:')
+      console.log('auth_token:', localStorage.getItem('auth_token'))
+      console.log('user_id:', localStorage.getItem('user_id'))
+      console.log('user_email:', localStorage.getItem('user_email'))
+      console.log('user_name:', localStorage.getItem('user_name'))
+      console.log('user_role:', localStorage.getItem('user_role'))
+    } catch (err) {
+      console.error('localStorage error:', err)
+      setLoading(false)
+      setError('Error storing login data. Please enable localStorage.')
+      return
+    }
     
     // Show success message
     setSuccess('Login successful! Redirecting...')
     setShowDashboardLink(true)
     
+    console.log('About to redirect to /dashboard')
+    
     // Redirect to dashboard immediately
+    console.log('=== LOGIN DEBUG END ===')
     window.location.href = '/dashboard'
   }
 
